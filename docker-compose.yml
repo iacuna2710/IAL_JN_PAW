@@ -1,4 +1,44 @@
 services:
+  # SQL Server en contenedor; los datos quedan en el volumen jn_bd_data
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:-Paw_Jueves2026}"
+    ports:
+      # 1433 ya lo usa el SQL Server local; desde SSMS: localhost,14330
+      - "14330:1433"
+    volumes:
+      - jn_bd_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # Restaura BD/Respaldo.sql solo si JN_BD todavia no existe
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:-Paw_Jueves2026}"
+    volumes:
+      - ./BD:/scripts:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        SQLCMD="/opt/mssql-tools18/bin/sqlcmd -S db -U sa -P $$MSSQL_SA_PASSWORD -C"
+        EXISTE=$$($$SQLCMD -h -1 -W -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM sys.databases WHERE name = 'JN_BD'" | tr -d '[:space:]')
+        if [ "$$EXISTE" = "0" ]; then
+          echo "Restaurando JN_BD desde Respaldo.sql..."
+          $$SQLCMD -b -i /scripts/Respaldo.sql
+        else
+          echo "JN_BD ya existe, no se restaura."
+        fi
+    depends_on:
+      db:
+        condition: service_healthy
+
   api:
     build:
       context: ./PAW_Jueves_API
@@ -7,8 +47,11 @@ services:
       - "5135:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      # Dentro del contenedor "localhost" no es tu PC: se usa host.docker.internal y autenticacion SQL
-      Variables__ConnectionString: "Server=host.docker.internal,1433; Database=JN_BD; User Id=${DB_USER:-sa}; Password=${DB_PASSWORD}; TrustServerCertificate=True;"
+      # Dentro del contenedor "localhost" no es tu PC: se usa el servicio "db" y autenticacion SQL
+      Variables__ConnectionString: "Server=db,1433; Database=JN_BD; User Id=sa; Password=${DB_PASSWORD:-Paw_Jueves2026}; TrustServerCertificate=True;"
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
 
   web:
     build:
@@ -21,3 +64,6 @@ services:
       Variables__ApiBaseUrl: "http://api:8080/api/"
     depends_on:
       - api
+
+volumes:
+  jn_bd_data:
