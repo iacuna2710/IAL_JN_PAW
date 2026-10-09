@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <partial name="_ThemeHead" />
   <title>Proyecto Web JN</title>
 
   <link rel="icon" type="image/png" href="~/images/favicon.ico">
@@ -85,6 +86,9 @@
 
       <!-- Right actions -->
       <div class="navbar-actions">
+        <!-- Theme toggle (claro / oscuro) -->
+        <partial name="_ThemeToggle" />
+
         <!-- Profile Dropdown -->
         <div class="dropdown ms-2">
           <button class="navbar-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -127,6 +131,7 @@
   <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="~/lib/apexcharts/apexcharts.min.js"></script>
   <script src="~/lib/flatpickr/flatpickr.min.js"></script>
+  <script src="~/js/theme.js" asp-append-version="true"></script>
   <script src="~/js/dashboard.js" asp-append-version="true"></script>
 </body>
 
