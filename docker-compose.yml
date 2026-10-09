@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: ./PAW_Jueves_API
+      dockerfile: PAW_Jueves_API/Dockerfile
+    ports:
+      - "5135:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # Dentro del contenedor "localhost" no es tu PC: se usa host.docker.internal y autenticacion SQL
+      Variables__ConnectionString: "Server=host.docker.internal,1433; Database=JN_BD; User Id=${DB_USER:-sa}; Password=${DB_PASSWORD}; TrustServerCertificate=True;"
+
+  web:
+    build:
+      context: ./PAW_Jueves
+      dockerfile: PAW_Jueves/Dockerfile
+    ports:
+      - "5051:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Variables__ApiBaseUrl: "http://api:8080/api/"
+    depends_on:
+      - api
