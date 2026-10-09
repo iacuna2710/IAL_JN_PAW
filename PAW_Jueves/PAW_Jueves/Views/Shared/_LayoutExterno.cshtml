@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <partial name="_ThemeHead" />
     <title>Proyecto Web JN</title>
         
     <link rel="icon" type="image/png" href="~/images/favicon.ico">
@@ -13,9 +14,12 @@
 </head>
 <body>
 
+    <partial name="_ThemeToggle" model="@("theme-toggle--floating")" />
+
     @RenderBody()
 
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/auth.js" asp-append-version="true"></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+<meta name="color-scheme" content="light dark">
+<script>
+  // Aplica el tema antes de pintar para evitar el parpadeo blanco (FOUC).
+  (function () {
+    var theme = 'light';
+    try {
+      var saved = localStorage.getItem('theme');
+      theme = (saved === 'light' || saved === 'dark')
+        ? saved
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    } catch (e) { }
+    document.documentElement.setAttribute('data-bs-theme', theme);
+  })();
+</script>
