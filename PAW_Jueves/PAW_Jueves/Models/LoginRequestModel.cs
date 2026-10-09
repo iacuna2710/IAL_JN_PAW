@@ -1,8 +1,12 @@
-﻿namespace PAW_Jueves.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PAW_Jueves.Models
 {
-    public class UsuarioModel
+    public class LoginRequestModel
     {
+        [Required]
         public string CorreoElectronico { get; set; } = string.Empty;
+        [Required]
         public string Contrasenna { get; set; } = string.Empty;
     }
 }
